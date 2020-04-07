@@ -1,9 +1,9 @@
+import inspect
 import sys
 from datetime import datetime
 from .compat import string_type
 from typing import (
-    Any, List, Sequence
-)
+    Any, Sequence, AnyStr)
 PEP_560 = sys.version_info[:3] >= (3, 7, 0)
 if PEP_560:  # pragma: no cover
     from typing import _GenericAlias, Union
@@ -15,7 +15,7 @@ class TypingExtractor(object):
 
     def __init__(self):
         self._extractor_list = []
-        self._extractor_list.append((string_type, _extract_string))
+        self._extractor_list.append((_is_string, _extract_string))
         self._extractor_list.append((_is_union, _extract_union))
         self._extractor_list.append((_is_sequence, _extract_seq))
         self._extractor_list.append((bool, _extract_bool))
@@ -101,6 +101,10 @@ def _extract_datetime(extractor, typ):
     return {"type": "string", "format": "date-time"}
 
 
+def _is_string(typ):
+    return typ == AnyStr or (isinstance(typ, type) and issubclass(typ, string_type))
+
+
 def _is_sequence(typ):
     """
     returns True if the type in question
@@ -112,7 +116,7 @@ def _is_sequence(typ):
     if PEP_560:  # pragma: no cover
         return isinstance(typ, _GenericAlias) and typ.__origin__ is list
     else:  # pragma: no cover
-        return issubclass(typ, Sequence)
+        return inspect.isclass(typ) and issubclass(typ, Sequence)
 
 
 def _is_union(typ):

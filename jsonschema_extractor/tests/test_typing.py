@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from typing import Any, List, Set, Optional, Union
+from typing import Any, List, Set, Optional, Union, AnyStr
 from jsonschema_extractor.typing_extractor import TypingExtractor
 from jsonschema_extractor.typing_extractor import PEP_560, _is_union
 
@@ -34,6 +34,9 @@ def typing_extractor():
             "type": "integer"
         }
     }),
+    (AnyStr, {
+        "type": "string"
+    })
 ])
 def test_extract_typing(extractor, inp, expected_output):
     assert extractor.extract(inp) == expected_output
